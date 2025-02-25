@@ -1,5 +1,7 @@
 package com.amarschool.omr.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,10 +29,13 @@ public class OMRController {
     @PostMapping("/recognize")
     public ResponseEntity<String> recognizeOMR(
             @RequestParam("patternFile") MultipartFile patternFile,
-            @RequestParam("imageFile") MultipartFile imageFile,
-            @RequestParam("outputFormat") String outputFormat) {
+            @RequestParam("imageFile") List<MultipartFile> imageFile
+            // ,@RequestParam("outputFormat") String outputFormat
+            ) {
 
-        String message = omrService.recognizeOMR(patternFile, imageFile, outputFormat);
+        String message = omrService.recognizeOMRCSV(patternFile, imageFile
+        // , outputFormat
+        );
         return ResponseEntity.ok(message);
     }
 }

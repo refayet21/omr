@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.amarschool.omr.GettingStarted.LoadLicenseFromFile;
@@ -42,37 +44,85 @@ public class OMRService {
         }
     }
 
-    public String recognizeOMR(MultipartFile patternFile, MultipartFile imageFile, String outputFormat) {
-        try {
+    // public String recognizeOMR(MultipartFile patternFile, MultipartFile imageFile, String outputFormat) {
+    //     try {
 
-            createDirectories();
+    //         createDirectories();
 
-            String patternFilePath = saveUploadedFile(patternFile);
+    //         String patternFilePath = saveUploadedFile(patternFile);
+    //         String imageFilePath = saveUploadedFile(imageFile);
+
+    //         String outputFileName = "results_" + System.currentTimeMillis();
+
+    //         // Process recognition
+    //         OmrEngine engine = new OmrEngine();
+    //         TemplateProcessor processor = engine.getTemplateProcessor(patternFilePath);
+
+
+    //         RecognitionResult result = processor.recognizeImage(imageFilePath);
+
+    //         String outputFilePath = OUTPUT_DIR + outputFileName;
+    //         if ("csv".equalsIgnoreCase(outputFormat)) {
+    //             String csv = result.getCsv();
+    //             saveToFile(outputFilePath + ".csv", csv);
+    //             return "Recognition results saved successfully as CSV at: " + outputFilePath + ".csv";
+    //         } else if ("json".equalsIgnoreCase(outputFormat)) {
+    //             String json = result.getJson();
+    //             saveToFile(outputFilePath + ".json", json);
+    //             return "Recognition results saved successfully as JSON at: " + outputFilePath + ".json";
+    //         } else {
+    //             return "Unsupported output format. Please choose 'csv' or 'json'.";
+    //         }
+    //     } catch (Exception e) {
+    //         return "Error recognizing OMR form: " + e.getMessage();
+    //     }
+    // }
+
+    public String recognizeOMRCSV(MultipartFile patternFile, List<MultipartFile> imageFiles) {
+    try {
+        createDirectories();
+
+        String patternFilePath = saveUploadedFile(patternFile);
+
+        OmrEngine engine = new OmrEngine();
+        TemplateProcessor processor = engine.getTemplateProcessor(patternFilePath);
+
+        StringBuilder consolidatedCsv = new StringBuilder();
+        boolean isFirstImage = true; 
+
+        for (MultipartFile imageFile : imageFiles) {
+           
             String imageFilePath = saveUploadedFile(imageFile);
 
-            String outputFileName = "results_" + System.currentTimeMillis();
-
-            // Process recognition
-            OmrEngine engine = new OmrEngine();
-            TemplateProcessor processor = engine.getTemplateProcessor(patternFilePath);
             RecognitionResult result = processor.recognizeImage(imageFilePath);
 
-            String outputFilePath = OUTPUT_DIR + outputFileName;
-            if ("csv".equalsIgnoreCase(outputFormat)) {
-                String csv = result.getCsv();
-                saveToFile(outputFilePath + ".csv", csv);
-                return "Recognition results saved successfully as CSV at: " + outputFilePath + ".csv";
-            } else if ("json".equalsIgnoreCase(outputFormat)) {
-                String json = result.getJson();
-                saveToFile(outputFilePath + ".json", json);
-                return "Recognition results saved successfully as JSON at: " + outputFilePath + ".json";
+            String csv = result.getCsv();
+
+        
+            if (isFirstImage) {
+                consolidatedCsv.append(csv);
+                isFirstImage = false;
             } else {
-                return "Unsupported output format. Please choose 'csv' or 'json'.";
+                String[] lines = csv.split("\n", 2);
+                if (lines.length > 1) {
+                    consolidatedCsv.append(lines[1]); 
+                }
             }
-        } catch (Exception e) {
-            return "Error recognizing OMR form: " + e.getMessage();
         }
+
+      
+        String outputFileName = "consolidated_results_" + System.currentTimeMillis() + ".csv";
+        String outputFilePath = OUTPUT_DIR + outputFileName;
+        saveToFile(outputFilePath, consolidatedCsv.toString());
+
+        return "All recognition results saved successfully in a single CSV file at: " + outputFilePath;
+
+    } catch (Exception e) {
+        return "Error recognizing OMR form: " + e.getMessage();
     }
+}
+
+
 
     private void createDirectories() throws IOException {
         Files.createDirectories(Paths.get(UPLOAD_DIR));
@@ -88,4 +138,6 @@ public class OMRService {
     private void saveToFile(String filePath, String content) throws IOException {
         Files.write(Paths.get(filePath), content.getBytes());
     }
+
+    
 }
