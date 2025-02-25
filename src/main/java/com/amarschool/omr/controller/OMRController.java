@@ -1,4 +1,4 @@
-package  com.amarschool.omr.controller;
+package com.amarschool.omr.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import  com.amarschool.omr.service.OMRService;
+import org.springframework.web.multipart.MultipartFile;
+import com.amarschool.omr.service.OMRService;
 
 @RestController
 @RequestMapping("/omr")
@@ -18,13 +19,18 @@ public class OMRController {
     @PostMapping("/generate")
     public ResponseEntity<String> generateOMR(
             @RequestParam String sourceFilePath,
-            @RequestParam String outputDir,
             @RequestParam String outputFileName) {
-
-        String message = omrService.generateOMR(sourceFilePath, outputDir, outputFileName);
-
+        String message = omrService.generateOMR(sourceFilePath, outputFileName);
         return ResponseEntity.ok(message);
-
     }
 
+    @PostMapping("/recognize")
+    public ResponseEntity<String> recognizeOMR(
+            @RequestParam("patternFile") MultipartFile patternFile,
+            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam("outputFormat") String outputFormat) {
+
+        String message = omrService.recognizeOMR(patternFile, imageFile, outputFormat);
+        return ResponseEntity.ok(message);
+    }
 }
