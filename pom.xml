@@ -52,12 +52,11 @@
 			<scope>test</scope>
 		</dependency>
 
-		      <dependency>
-            <groupId>com.aspose</groupId>
-            <artifactId>aspose-omr</artifactId>
-            <version>23.5</version>
-
-        </dependency>
+		   <dependency>
+<groupId>com.aspose</groupId>
+<artifactId>aspose-omr</artifactId>
+<version>24.12</version>
+</dependency>
 	</dependencies>
 
 	<repositories>
