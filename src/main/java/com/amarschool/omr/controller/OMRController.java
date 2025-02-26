@@ -20,9 +20,9 @@ public class OMRController {
 
     @PostMapping("/generate")
     public ResponseEntity<String> generateOMR(
-            @RequestParam String sourceFilePath,
-            @RequestParam String outputFileName) {
-        String message = omrService.generateOMR(sourceFilePath, outputFileName);
+            @RequestParam MultipartFile sourceFile,
+            @RequestParam String fileName) {
+        String message = omrService.generateOMR(sourceFile, fileName);
         return ResponseEntity.ok(message);
     }
 

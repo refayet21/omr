@@ -10,9 +10,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.amarschool.omr.GettingStarted.LoadLicenseFromFile;
-import com.aspose.omr.FontStyle;
 import com.aspose.omr.GenerationResult;
-import com.aspose.omr.GlobalPageSettings;
 import com.aspose.omr.OmrEngine;
 import com.aspose.omr.RecognitionResult;
 import com.aspose.omr.TemplateProcessor;
@@ -23,22 +21,20 @@ public class OMRService {
     private static final String UPLOAD_DIR = "uploads/";
     private static final String OUTPUT_DIR = "output/";
 
-    public String generateOMR(String sourceFilePath, String outputFileName) {
+    public String generateOMR(MultipartFile sourceFile, String fileName) {
         try {
             createDirectories();
-
+            String sourceFilePath = saveUploadedFile(sourceFile);    
             LoadLicenseFromFile.run();
             OmrEngine engine = new OmrEngine();
-            GlobalPageSettings pageSettings = new GlobalPageSettings();
-            pageSettings.FontFamily = "Courier New";
-            pageSettings.FontSize = 16;
-            pageSettings.FontStyle = FontStyle.Italic;
+            // GlobalPageSettings pageSettings = new GlobalPageSettings();
+            // pageSettings.FontFamily = "Courier New";
+            // pageSettings.FontSize = 16;
+            // pageSettings.FontStyle = FontStyle.Italic;
+            GenerationResult result = engine.generateTemplate(sourceFilePath);
+            result.save(OUTPUT_DIR, fileName);
 
-            GenerationResult result = engine.generateTemplate(sourceFilePath, pageSettings);
-            String outputPath = OUTPUT_DIR + outputFileName;
-            result.save(OUTPUT_DIR, outputFileName);
-
-            return "Form generated successfully at: " + outputPath;
+            return "Form generated successfully";
         } catch (Exception e) {
             return "Error generating form: " + e.getMessage();
         }
